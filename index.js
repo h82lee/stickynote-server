@@ -21,8 +21,6 @@ mongoose
   })
   .catch(console.error);
 
-// mongoose.connect(process.env.ATLAS_URI);
-
 app.get("/notes", async (req, res) => {
   const notes = await noteModel.find();
   res.json(notes);
@@ -35,32 +33,17 @@ app.post("/notes/create", (req, res) => {
   });
   note.save();
   res.json(note);
-
-  // const note = req.body;
-  // const newNote = new noteModel(note);
-  // newNote.save();
-
-  // res.json(newNote);
 });
-
-// app.post("/createNote", async (req, res) => {
-//   const note = req.body;
-//   const newNote = new noteModel(note);
-//   await newNote.save();
-
-//   res.json(note);
-// });
 
 app.put("/notes/update", async (req, res) => {
   const updatedContent = req.body.updatedContent;
   const id = req.body.id;
 
   await noteModel
-    .findByIdAndUpdate(id, { content: updatedContent }, (err, docs) => {
-      if (err) console.log(err);
+    .findByIdAndUpdate(id, { content: updatedContent })
+    .then((docs) => {
       return res.send(docs);
-    })
-    .clone();
+    });
 });
 
 app.delete("/notes/delete/:id", async (req, res) => {
