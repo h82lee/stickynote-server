@@ -22,7 +22,7 @@ mongoose
   .catch(console.error);
 
 app.get("/notes", async (req, res) => {
-  const notes = await noteModel.find();
+  const notes = await noteModel.find().catch((err) => console.log(err));
   res.json(notes);
 });
 
@@ -43,7 +43,8 @@ app.put("/notes/update", async (req, res) => {
     .findByIdAndUpdate(id, { content: updatedContent })
     .then((docs) => {
       return res.send(docs);
-    });
+    })
+    .catch((err) => console.log(err));
 });
 
 app.delete("/notes/delete/:id", async (req, res) => {
