@@ -11,52 +11,62 @@ dotenv.config();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(process.env.ATLAS_URI);
+mongoose
+  .connect("mongodb://127.0.0.1:27017/stickynote", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("connected to database");
+  })
+  .catch(console.error);
 
-app.get("/getNotes", async (req, res) => {
-  await noteModel
-    .find({}, (err, result) => {
-      if (err) {
-        res.json(err);
-      } else {
-        res.json(result);
-      }
-    })
-    .clone()
-    .catch(function (err) {
-      console.log(err);
-    });
+// mongoose.connect(process.env.ATLAS_URI);
+
+app.get("/notes", async (req, res) => {
+  const notes = await noteModel.find();
+  res.json(notes);
 });
 
-app.post("/createNote", async (req, res) => {
-  const note = req.body;
-  const newNote = new noteModel(note);
-  await newNote.save();
-
+app.post("/notes/create", (req, res) => {
+  const note = new noteModel({
+    title: req.body.title,
+    content: req.body.content,
+  });
+  note.save();
   res.json(note);
+
+  // const note = req.body;
+  // const newNote = new noteModel(note);
+  // newNote.save();
+
+  // res.json(newNote);
 });
 
-app.put("/updateNote", async (req, res) => {
+// app.post("/createNote", async (req, res) => {
+//   const note = req.body;
+//   const newNote = new noteModel(note);
+//   await newNote.save();
+
+//   res.json(note);
+// });
+
+app.put("/notes/update", async (req, res) => {
   const updatedContent = req.body.updatedContent;
   const id = req.body.id;
 
-  try {
-    await noteModel
-      .findById(id, (err, contentToUpdate) => {
-        contentToUpdate.content = updatedContent;
-        contentToUpdate.save();
-      })
-      .clone();
-  } catch (err) {
-    console.log(err);
-  }
-  res.send("updated");
+  await noteModel
+    .findByIdAndUpdate(id, { content: updatedContent }, (err, docs) => {
+      if (err) console.log(err);
+      return res.send(docs);
+    })
+    .clone();
 });
 
-app.delete("/deleteNote/:id", async (req, res) => {
+app.delete("/notes/delete/:id", async (req, res) => {
   const id = req.params.id;
-  await noteModel.findByIdAndRemove(id).exec();
-  res.send("note deleted");
+  const result = await noteModel.findByIdAndDelete(id);
+  res.send(result);
 });
 
 app.listen(3001, () => {
