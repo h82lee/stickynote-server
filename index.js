@@ -19,7 +19,7 @@ mongoose
   .then(() => {
     console.log("connected to database");
   })
-  .catch(console.error);
+  .catch((err) => console.log(err));
 
 app.get("/notes", async (req, res) => {
   const notes = await noteModel.find().catch((err) => console.log(err));
