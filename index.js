@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cors());
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/stickynote", {
+  .connect(process.env.ATLAS_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -41,7 +41,8 @@ app.put("/notes/update", async (req, res) => {
 
   await noteModel
     .findByIdAndUpdate(id, { content: updatedContent })
-    .then((docs) => {
+    .then((err, docs) => {
+      if (err) console.log(err);
       return res.send(docs);
     })
     .catch((err) => console.log(err));
